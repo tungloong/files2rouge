@@ -1,3 +1,4 @@
+Small fix from https://github.com/pltrdy/files2rouge
 # Files2ROUGE
 ## Motivations
 Given two files with the same number of lines, `files2rouge` calculates the average ROUGE scores of each sequence (=line). Each sequence may contain multiple sentences. In this case, the end of sentence string must be passed using the `--eos` flag (default: "."). Running `files2rouge` with a wrong eos delimiter may lead to incorrect ROUGE-L score.
@@ -28,14 +29,14 @@ optional arguments:
 ## Getting Started
 **0) Install prerequisites**
 ```bash
-pip install -U git+https://github.com/pltrdy/pyrouge
+pip install -U git+https://github.com/tungloong/pyrouge
 ```
 (**NOTE:** running `pip install pyrouge` would not work as the package is out of date on PyPI)
 
 
 **1) Clone the repo, setup the module and ROUGE**
 ```bash
-git clone https://github.com/pltrdy/files2rouge.git     
+git clone https://github.com/tungloong/files2rouge.git     
 cd files2rouge
 python setup_rouge.py
 python setup.py install
