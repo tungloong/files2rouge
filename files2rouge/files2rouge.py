@@ -34,43 +34,44 @@ def run(summ_path,
     s = settings.Settings()
     s._load()
     stime = time()
-    dirpath = tempfile.mkdtemp()
-    sys_root, model_root = [os.path.join(dirpath, _)
-                            for _ in ["system", "model"]]
+    # dirpath = tempfile.mkdtemp()
+    with tempfile.TemporaryDirectory() as dirpath:
+        sys_root, model_root = [os.path.join(dirpath, _)
+                                for _ in ["system", "model"]]
 
-    print("Preparing documents...", end=" ")
-    utils.mkdirs([sys_root, model_root])
-    ignored = utils.split_files(model_file=ref_path,
-                                system_file=summ_path,
-                                model_dir=model_root,
-                                system_dir=sys_root,
-                                eos=eos,
-                                ignore_empty=ignore_empty)
-    print("%d line(s) ignored" % len(ignored))
-    print("Running ROUGE...")
-    log_level = logging.ERROR if not verbose else None
-    r = pyrouge.Rouge155(rouge_dir=os.path.dirname(s.data['ROUGE_path']),
-                         log_level=log_level)
-    r.system_dir = sys_root
-    r.model_dir = model_root
-    r.system_filename_pattern = r's.(\d+).txt'
-    r.model_filename_pattern = 'm.[A-Z].#ID#.txt'
-    data_arg = "-e %s" % s.data['ROUGE_data']
+        print("Preparing documents...", end=" ")
+        utils.mkdirs([sys_root, model_root])
+        ignored = utils.split_files(model_file=ref_path,
+                                    system_file=summ_path,
+                                    model_dir=model_root,
+                                    system_dir=sys_root,
+                                    eos=eos,
+                                    ignore_empty=ignore_empty)
+        print("%d line(s) ignored" % len(ignored))
+        print("Running ROUGE...")
+        log_level = logging.ERROR if not verbose else None
+        r = pyrouge.Rouge155(rouge_dir=os.path.dirname(s.data['ROUGE_path']),
+                            log_level=log_level)
+        r.system_dir = sys_root
+        r.model_dir = model_root
+        r.system_filename_pattern = r's.(\d+).txt'
+        r.model_filename_pattern = 'm.[A-Z].#ID#.txt'
+        data_arg = "-e %s" % s.data['ROUGE_data']
 
-    if not rouge_args:
-        rouge_args = [
-            '-c', 95,
-            '-r', 1000,
-            '-n', 2,
-            '-a']
-        if stemming:
-            rouge_args.append("-m")
+        if not rouge_args:
+            rouge_args = [
+                '-c', 95,
+                '-r', 1000,
+                '-n', 2,
+                '-a']
+            if stemming:
+                rouge_args.append("-m")
 
-        rouge_args_str = " ".join([str(_) for _ in rouge_args])
-    else:
-        rouge_args_str = rouge_args
-    rouge_args_str = "%s %s" % (data_arg, rouge_args_str)
-    output = r.convert_and_evaluate(rouge_args=rouge_args_str)
+            rouge_args_str = " ".join([str(_) for _ in rouge_args])
+        else:
+            rouge_args_str = rouge_args
+        rouge_args_str = "%s %s" % (data_arg, rouge_args_str)
+        output = r.convert_and_evaluate(rouge_args=rouge_args_str)
 
     if saveto is not None:
         saveto = open(saveto, 'w')
